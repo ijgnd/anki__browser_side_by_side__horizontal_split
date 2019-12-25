@@ -30,18 +30,8 @@ def gc(arg, fail=False):
     return mw.addonManager.getConfig(__name__).get(arg, fail)
 
 
-# doesn't work with night-mode version published on 2019-04-21
-# def additionalInit(self, mw):
-#     self.side_by_side = False
-#     if gc("side-by-side is default"):
-#         self.side_by_side = True
-#         self.form.splitter.setOrientation(Qt.Horizontal)
-# Browser.__init__ = wrap(Browser.__init__, additionalInit)
-
-
-# ugly workaround since wrapping Browser.__init__ didn't work with night-mode version published on 2019-04-21
+# wrapping Browser.__init__ didn't work with night-mode (version published on 2019-04-21)
 def additionalInit(self):
-    print('in additional init')
     self.side_by_side = False
     if gc("side-by-side is default"):
         self.side_by_side = True
@@ -59,12 +49,6 @@ Browser._closeWindow = wrap(Browser._closeWindow, additionalClose, "before")
 
 
 def toggle_orientation(self):
-    # # limited compatibility to night mode version published on 2019-04-21
-    # if not hasattr(self, "side_by_side"):
-    #     # reverse so that last line works
-    #     self.side_by_side = True
-    #     if gc("side-by-side is default"):
-    #         self.side_by_side = False
     if self.side_by_side:
         o = Qt.Vertical
     else:
