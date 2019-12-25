@@ -47,6 +47,12 @@ Browser._closeWindow = wrap(Browser._closeWindow, additionalClose, "before")
 
 
 def toggle_orientation(self):
+    # limited compatibility to night mode version published on 2019-04-21
+    if not hasattr(self, "side_by_side"):
+        # reverse so that last line works
+        self.side_by_side = True
+        if gc("side-by-side is default"):
+            self.side_by_side = False
     if self.side_by_side:
         o = Qt.Vertical
     else:
