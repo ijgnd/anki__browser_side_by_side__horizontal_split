@@ -38,6 +38,14 @@ def additionalInit(self, mw):
 Browser.__init__ = wrap(Browser.__init__, additionalInit)
 
 
+# Browser saves splitter state (including the orientation), so that
+# after uninstalling the add-on and restarting Anki you still would have 
+# the editor by the side. So reset the orientation before the window is closed.
+def additionalClose(self):
+    self.form.splitter.setOrientation(Qt.Vertical)
+Browser._closeWindow = wrap(Browser._closeWindow, additionalClose, "before")
+
+
 def toggle_orientation(self):
     if self.side_by_side:
         o = Qt.Vertical
