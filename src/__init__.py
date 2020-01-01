@@ -32,12 +32,48 @@ def gc(arg, fail=False):
 
 # wrapping Browser.__init__ didn't work with night-mode (version published on 2019-04-21)
 def additionalInit(self):
-    self.side_by_side = False
+    # self.form.splitter.splitterMoved.connect(self.onSplitterMoved)
+    self.togthres = gc("toggle to vertical if editor narrower than")
+    self.autoswitched = False
+    if self.togthres:
+        self.resizeEvent = self.onWindowResized
+    # self.form.splitter.setStretchFactor(0,1)
+    # self.form.splitter.setStretchFactor(1,1)
     if gc("side-by-side is default"):
-        self.side_by_side = True
         self.form.splitter.setOrientation(Qt.Horizontal)
 Browser.setupEditor = wrap(Browser.setupEditor, additionalInit)
 
+
+# def onSplitterMoved(self, pos):
+#     print("splitter was moved to pos: {}".format(pos))
+#     tab, edi = self.form.splitter.sizes()
+#     print("new sizes: {}, {}".format(tab, edi))
+# Browser.onSplitterMoved = onSplitterMoved
+
+
+def onWindowResized(self, event):
+    # on opening no editor is shown (but self.form.splitter.sizes() returns 
+    # a size for the editor ...
+    if not self.form.fieldsArea.isVisible():  # editor
+        return
+    # self.size(), self.width(), height()
+    tab, edi = self.form.splitter.sizes()  # if horizontal that's widths, else heights
+    if self.form.splitter.orientation() == Qt.Horizontal:   
+        if 0 < edi < self.togthres:
+            if self.form.splitter.orientation() == Qt.Horizontal:
+                self.form.splitter.setOrientation(Qt.Vertical)
+                self.autoswitched = True
+                if self.sidebarDockWidget.isVisible():
+                    dw_width = self.sidebarDockWidget.width()
+                else:
+                    dw_width = 0
+                self.width_when_switched = self.width() - dw_width
+    else:  # Qt.Vertical
+        if self.autoswitched and self.width() > self.width_when_switched:
+            if self.form.splitter.orientation() == Qt.Vertical:
+                self.form.splitter.setOrientation(Qt.Horizontal)
+                self.autoswitched = False
+Browser.onWindowResized = onWindowResized
 
 
 # Browser saves splitter state (including the orientation), so that
@@ -49,12 +85,12 @@ Browser._closeWindow = wrap(Browser._closeWindow, additionalClose, "before")
 
 
 def toggle_orientation(self):
-    if self.side_by_side:
+    if self.form.splitter.orientation() == Qt.Horizontal:
         o = Qt.Vertical
     else:
         o = Qt.Horizontal
     self.form.splitter.setOrientation(o)
-    self.side_by_side ^= True
+Browser.toggle_orientation = toggle_orientation
 
 
 def onSetupMenus(self):
@@ -62,10 +98,8 @@ def onSetupMenus(self):
         m = self.menuView
     except:
         self.menuView = QMenu("&View")
-        action = self.menuBar().insertMenu(
-            self.mw.form.menuTools.menuAction(), self.menuView)
+        self.menuBar().insertMenu(self.mw.form.menuTools.menuAction(), self.menuView)
         m = self.menuView
-
     a = m.addAction('toggle editor on the bottom/side')
     a.triggered.connect(lambda _, b=self: toggle_orientation(b))
     a.setShortcut(QKeySequence(gc("shortcut","")))
