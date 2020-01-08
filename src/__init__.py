@@ -51,6 +51,21 @@ Browser.setupEditor = wrap(Browser.setupEditor, additionalInit)
 # Browser.onSplitterMoved = onSplitterMoved
 
 
+def toVertical(self):
+    if self.form.splitter.orientation() == Qt.Horizontal:
+        self.form.splitter.setOrientation(Qt.Vertical)
+        self.autoswitched = True
+        if self.sidebarDockWidget.isVisible():
+            dw_width = self.sidebarDockWidget.width()
+        else:
+            dw_width = 0
+        self.width_when_switched = self.width() - dw_width
+
+def toHorizontal(self):
+    if self.form.splitter.orientation() == Qt.Vertical:
+        self.form.splitter.setOrientation(Qt.Horizontal)
+        self.autoswitched = False
+
 def onWindowResized(self, event):
     # on opening no editor is shown (but self.form.splitter.sizes() returns 
     # a size for the editor ...
@@ -60,19 +75,11 @@ def onWindowResized(self, event):
     tab, edi = self.form.splitter.sizes()  # if horizontal that's widths, else heights
     if self.form.splitter.orientation() == Qt.Horizontal:   
         if 0 < edi < self.togthres:
-            if self.form.splitter.orientation() == Qt.Horizontal:
-                self.form.splitter.setOrientation(Qt.Vertical)
-                self.autoswitched = True
-                if self.sidebarDockWidget.isVisible():
-                    dw_width = self.sidebarDockWidget.width()
-                else:
-                    dw_width = 0
-                self.width_when_switched = self.width() - dw_width
+                mw.progress.timer(150, lambda browser=self: toVertical(browser), False)
     else:  # Qt.Vertical
         if self.autoswitched and self.width() > self.width_when_switched:
             if self.form.splitter.orientation() == Qt.Vertical:
-                self.form.splitter.setOrientation(Qt.Horizontal)
-                self.autoswitched = False
+                mw.progress.timer(150, lambda browser=self: toHorizontal(browser), False)
 Browser.onWindowResized = onWindowResized
 
 

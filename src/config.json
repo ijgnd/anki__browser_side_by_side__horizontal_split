@@ -1,5 +1,5 @@
 {
     "shortcut":"ctrl+alt+8",
     "side-by-side is default": true,
-    "toggle to vertical if editor narrower than": 300
+    "toggle to vertical if editor narrower than": false
 }
