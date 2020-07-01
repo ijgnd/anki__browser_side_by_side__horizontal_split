@@ -25,6 +25,8 @@ from aqt import mw
 from aqt.browser import Browser
 from aqt.qt import *
 
+from .toolbar import getMenu
+
 
 def gc(arg, fail=False):
     return mw.addonManager.getConfig(__name__).get(arg, fail)
@@ -101,13 +103,10 @@ Browser.toggle_orientation = toggle_orientation
 
 
 def onSetupMenus(self):
-    try:
-        m = self.menuView
-    except:
-        self.menuView = QMenu("&View")
-        self.menuBar().insertMenu(self.mw.form.menuTools.menuAction(), self.menuView)
-        m = self.menuView
+    m = getMenu(self, "&View")
     a = m.addAction('toggle editor on the bottom/side')
     a.triggered.connect(lambda _, b=self: toggle_orientation(b))
-    a.setShortcut(QKeySequence(gc("shortcut","")))
+    cut = gc("shortcut")
+    if cut:
+        a.setShortcut(QKeySequence(cut))
 addHook("browser.setupMenus", onSetupMenus)
