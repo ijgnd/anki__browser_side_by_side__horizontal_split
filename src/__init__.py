@@ -29,7 +29,11 @@ from .toolbar import getMenu
 
 
 def gc(arg, fail=False):
-    return mw.addonManager.getConfig(__name__).get(arg, fail)
+    conf = mw.addonManager.getConfig(__name__)
+    if conf:
+        return conf.get(arg, fail)
+    else:
+        return fail
 
 
 # wrapping Browser.__init__ didn't work with night-mode (version published on 2019-04-21)
