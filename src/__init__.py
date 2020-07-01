@@ -21,7 +21,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 from anki.hooks import addHook, wrap
 
-from aqt import mw 
+from aqt import gui_hooks
+from aqt import mw
 from aqt.browser import Browser
 from aqt.qt import (
     QKeySequence,
@@ -50,7 +51,7 @@ def additionalInit(self):
     # self.form.splitter.setStretchFactor(1,1)
     if gc("side-by-side is default"):
         self.form.splitter.setOrientation(Qt.Horizontal)
-Browser.setupEditor = wrap(Browser.setupEditor, additionalInit)
+gui_hooks.browser_will_show.append(additionalInit)
 
 
 # def onSplitterMoved(self, pos):
@@ -70,19 +71,21 @@ def toVertical(self):
             dw_width = 0
         self.width_when_switched = self.width() - dw_width
 
+
 def toHorizontal(self):
     if self.form.splitter.orientation() == Qt.Vertical:
         self.form.splitter.setOrientation(Qt.Horizontal)
         self.autoswitched = False
 
+
 def onWindowResized(self, event):
-    # on opening no editor is shown (but self.form.splitter.sizes() returns 
+    # on opening no editor is shown (but self.form.splitter.sizes() returns
     # a size for the editor ...
     if not self.form.fieldsArea.isVisible():  # editor
         return
     # self.size(), self.width(), height()
-    tab, edi = self.form.splitter.sizes()  # if horizontal that's widths, else heights
-    if self.form.splitter.orientation() == Qt.Horizontal:   
+    _, edi = self.form.splitter.sizes()  # if horizontal that's widths, else heights
+    if self.form.splitter.orientation() == Qt.Horizontal:
         if 0 < edi < self.togthres:
                 mw.progress.timer(150, lambda browser=self: toVertical(browser), False)
     else:  # Qt.Vertical
@@ -93,7 +96,7 @@ Browser.onWindowResized = onWindowResized
 
 
 # Browser saves splitter state (including the orientation), so that
-# after uninstalling the add-on and restarting Anki you still would have 
+# after uninstalling the add-on and restarting Anki you still would have
 # the editor by the side. So reset the orientation before the window is closed.
 def additionalClose(self):
     self.form.splitter.setOrientation(Qt.Vertical)
@@ -101,12 +104,12 @@ Browser._closeWindow = wrap(Browser._closeWindow, additionalClose, "before")
 
 
 def toggle_orientation(self):
+    # self is browser
     if self.form.splitter.orientation() == Qt.Horizontal:
         o = Qt.Vertical
     else:
         o = Qt.Horizontal
     self.form.splitter.setOrientation(o)
-Browser.toggle_orientation = toggle_orientation
 
 
 def onSetupMenus(self):
