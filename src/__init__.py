@@ -23,7 +23,10 @@ from anki.hooks import addHook, wrap
 
 from aqt import mw 
 from aqt.browser import Browser
-from aqt.qt import *
+from aqt.qt import (
+    QKeySequence,
+    Qt,
+)
 
 from .toolbar import getMenu
 
