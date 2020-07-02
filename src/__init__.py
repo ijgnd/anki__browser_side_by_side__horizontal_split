@@ -40,25 +40,56 @@ def gc(arg, fail=False):
         return fail
 
 
-# wrapping Browser.__init__ didn't work with night-mode (version published on 2019-04-21)
+def use_extra_line():
+    # maybe useful in the future when I want to disable it for some versions
+    return gc("when narrow move search bar to extra line")
+
+
+
+searchbar = None
+searchbar_index = None
+
+
 def additionalInit(self):
-    # self.form.splitter.splitterMoved.connect(self.onSplitterMoved)
+    global searchbar
+    global searchbar_index
+    # self is browser
     self.togthres = gc("toggle to vertical if editor narrower than")
     self.autoswitched = False
     if self.togthres:
         self.resizeEvent = self.onWindowResized
-    # self.form.splitter.setStretchFactor(0,1)
-    # self.form.splitter.setStretchFactor(1,1)
     if gc("side-by-side is default"):
         self.form.splitter.setOrientation(Qt.Horizontal)
+    
+    # store lineedit and its index
+    grid = self.form.gridLayout
+    for idx in range(grid.count()):   
+        item = grid.itemAt(idx)
+        coord = grid.getItemPosition(idx)
+        w = item.widget()
+        name = w.objectName() if hasattr(w, "objectName") else ""
+        if name == "searchEdit":
+            searchbar = w
+            searchbar_index = coord[1]
+
+    #maybe move lineedit
+    if not use_extra_line():
+        return
+    if self.form.splitter.orientation() == Qt.Horizontal:
+        make_two_rows(self)
 gui_hooks.browser_will_show.append(additionalInit)
 
 
-# def onSplitterMoved(self, pos):
-#     print("splitter was moved to pos: {}".format(pos))
-#     tab, edi = self.form.splitter.sizes()
-#     print("new sizes: {}, {}".format(tab, edi))
-# Browser.onSplitterMoved = onSplitterMoved
+def make_two_rows(self):
+    # self is browser
+    if searchbar:
+        self.form.gridLayout.addWidget(searchbar, 1, 0, 1, -1)
+
+
+def back_to_one_row(self):
+    # self is browser
+    if searchbar:
+        self.form.gridLayout.addWidget(searchbar, 0, searchbar_index, 1, 1)
 
 
 def toVertical(self):
@@ -70,12 +101,14 @@ def toVertical(self):
         else:
             dw_width = 0
         self.width_when_switched = self.width() - dw_width
+        back_to_one_row(self)
 
 
 def toHorizontal(self):
     if self.form.splitter.orientation() == Qt.Vertical:
         self.form.splitter.setOrientation(Qt.Horizontal)
         self.autoswitched = False
+        make_two_rows(self)
 
 
 def onWindowResized(self, event):
@@ -105,11 +138,14 @@ Browser._closeWindow = wrap(Browser._closeWindow, additionalClose, "before")
 
 def toggle_orientation(self):
     # self is browser
-    if self.form.splitter.orientation() == Qt.Horizontal:
+    if self.form.splitter.orientation() == Qt.Horizontal:  # editor is at the bottom
         o = Qt.Vertical
-    else:
+        func = back_to_one_row
+    else:  # editor is on the side
         o = Qt.Horizontal
+        func = make_two_rows
     self.form.splitter.setOrientation(o)
+    func(self)
 
 
 def onSetupMenus(self):

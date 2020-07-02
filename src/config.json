@@ -1,5 +1,6 @@
 {
     "shortcut":"ctrl+alt+8",
     "side-by-side is default": true,
-    "toggle to vertical if editor narrower than": false
+    "toggle to vertical if editor narrower than": false,
+    "when narrow move search bar to extra line": true
 }
