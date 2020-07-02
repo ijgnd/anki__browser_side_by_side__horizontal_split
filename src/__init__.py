@@ -150,6 +150,8 @@ def toggle_orientation(self):
 
 def onSetupMenus(self):
     m = getMenu(self, "&View")
+    if not hasattr(self, "menuView"):
+        self.menuView = m
     a = m.addAction('toggle editor on the bottom/side')
     a.triggered.connect(lambda _, b=self: toggle_orientation(b))
     cut = gc("shortcut")
