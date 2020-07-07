@@ -40,6 +40,20 @@ def gc(arg, fail=False):
         return fail
 
 
+######### Browser GUI
+
+has_BetterSearch = None
+def check_for_BetterSearch():
+    global has_BetterSearch
+    try:
+        bs = __import__("1052724801").version
+    except:
+        has_BetterSearch = None
+    else: 
+        has_BetterSearch = isinstance(bs, int) and bs >= 2
+gui_hooks.profile_did_open.append(check_for_BetterSearch)
+
+
 def use_extra_line():
     # maybe useful in the future when I want to disable it for some versions
     return gc("when narrow move search bar to extra line")
@@ -82,13 +96,13 @@ gui_hooks.browser_will_show.append(additionalInit)
 
 def make_two_rows(self):
     # self is browser
-    if searchbar:
+    if searchbar and not has_BetterSearch:
         self.form.gridLayout.addWidget(searchbar, 1, 0, 1, -1)
 
 
 def back_to_one_row(self):
     # self is browser
-    if searchbar:
+    if searchbar and not has_BetterSearch:
         self.form.gridLayout.addWidget(searchbar, 0, searchbar_index, 1, 1)
 
 
