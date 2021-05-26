@@ -20,6 +20,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
 from anki.hooks import addHook, wrap
+from anki.utils import pointVersion
 
 from aqt import gui_hooks
 from aqt import mw
@@ -96,6 +97,8 @@ gui_hooks.browser_will_show.append(additionalInit)
 
 def make_two_rows(self):
     # self is browser
+    if pointVersion() >= 41:
+        return
     if searchbar: 
         if has_BetterSearch:
             if hasattr(self, "self.bettersearch_modified_searchbar_position"):
@@ -106,6 +109,8 @@ def make_two_rows(self):
 
 def back_to_one_row(self):
     # self is browser
+    if pointVersion() >= 41:
+        return
     if searchbar and not has_BetterSearch:
         self.form.gridLayout.addWidget(searchbar, 0, searchbar_index, 1, 1)
 
