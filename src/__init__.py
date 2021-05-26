@@ -96,7 +96,11 @@ gui_hooks.browser_will_show.append(additionalInit)
 
 def make_two_rows(self):
     # self is browser
-    if searchbar and not has_BetterSearch:
+    if searchbar: 
+        if has_BetterSearch:
+            if hasattr(self, "self.bettersearch_modified_searchbar_position"):
+                if self.self.bettersearch_modified_searchbar_position:
+                    return
         self.form.gridLayout.addWidget(searchbar, 1, 0, 1, -1)
 
 
