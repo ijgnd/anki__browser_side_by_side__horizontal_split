@@ -74,7 +74,7 @@ def additionalInit(self):
     if self.togthres:
         self.resizeEvent = self.onWindowResized
     if gc("side-by-side is default"):
-        self.form.splitter.setOrientation(Qt.Horizontal)
+        self.form.splitter.setOrientation(Qt.Orientation.Horizontal)
     
     # store lineedit and its index
     grid = self.form.gridLayout
@@ -90,7 +90,7 @@ def additionalInit(self):
     #maybe move lineedit
     if not use_extra_line():
         return
-    if self.form.splitter.orientation() == Qt.Horizontal:
+    if self.form.splitter.orientation() == Qt.Orientation.Horizontal:
         make_two_rows(self)
 gui_hooks.browser_will_show.append(additionalInit)
 
@@ -116,8 +116,8 @@ def back_to_one_row(self):
 
 
 def toVertical(self):
-    if self.form.splitter.orientation() == Qt.Horizontal:
-        self.form.splitter.setOrientation(Qt.Vertical)
+    if self.form.splitter.orientation() == Qt.Orientation.Horizontal:
+        self.form.splitter.setOrientation(Qt.Orientation.Vertical)
         self.autoswitched = True
         if self.sidebarDockWidget.isVisible():
             dw_width = self.sidebarDockWidget.width()
@@ -128,8 +128,8 @@ def toVertical(self):
 
 
 def toHorizontal(self):
-    if self.form.splitter.orientation() == Qt.Vertical:
-        self.form.splitter.setOrientation(Qt.Horizontal)
+    if self.form.splitter.orientation() == Qt.Orientation.Vertical:
+        self.form.splitter.setOrientation(Qt.Orientation.Horizontal)
         self.autoswitched = False
         make_two_rows(self)
 
@@ -141,12 +141,12 @@ def onWindowResized(self, event):
         return
     # self.size(), self.width(), height()
     _, edi = self.form.splitter.sizes()  # if horizontal that's widths, else heights
-    if self.form.splitter.orientation() == Qt.Horizontal:
+    if self.form.splitter.orientation() == Qt.Orientation.Horizontal:
         if 0 < edi < self.togthres:
                 mw.progress.timer(150, lambda browser=self: toVertical(browser), False)
-    else:  # Qt.Vertical
+    else:  # Qt.Orientation.Vertical
         if self.autoswitched and self.width() > self.width_when_switched:
-            if self.form.splitter.orientation() == Qt.Vertical:
+            if self.form.splitter.orientation() == Qt.Orientation.Vertical:
                 mw.progress.timer(150, lambda browser=self: toHorizontal(browser), False)
 Browser.onWindowResized = onWindowResized
 
@@ -155,17 +155,17 @@ Browser.onWindowResized = onWindowResized
 # after uninstalling the add-on and restarting Anki you still would have
 # the editor by the side. So reset the orientation before the window is closed.
 def additionalClose(self):
-    self.form.splitter.setOrientation(Qt.Vertical)
+    self.form.splitter.setOrientation(Qt.Orientation.Vertical)
 Browser._closeWindow = wrap(Browser._closeWindow, additionalClose, "before")
 
 
 def toggle_orientation(self):
     # self is browser
-    if self.form.splitter.orientation() == Qt.Horizontal:  # editor is at the bottom
-        o = Qt.Vertical
+    if self.form.splitter.orientation() == Qt.Orientation.Horizontal:  # editor is at the bottom
+        o = Qt.Orientation.Vertical
         func = back_to_one_row
     else:  # editor is on the side
-        o = Qt.Horizontal
+        o = Qt.Orientation.Horizontal
         func = make_two_rows
     self.form.splitter.setOrientation(o)
     func(self)
